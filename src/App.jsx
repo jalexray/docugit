@@ -6,6 +6,17 @@ import EmptyState from './components/Editor/EmptyState'
 import GitPanel from './components/GitPanel/GitPanel'
 import * as api from './api'
 
+function findInTree(tree, predicate) {
+  for (const item of tree) {
+    if (item.type === 'file' && predicate(item)) return item.path
+    if (item.type === 'directory' && item.children) {
+      const found = findInTree(item.children, predicate)
+      if (found) return found
+    }
+  }
+  return null
+}
+
 function App() {
   const [repoPath, setRepoPath] = useState(null)
   const [files, setFiles] = useState([])
@@ -26,11 +37,23 @@ function App() {
     }).catch(() => {})
   }, [])
 
-  // Load file tree when repo changes
+  // Load file tree when repo changes, then auto-open last file or README
   useEffect(() => {
     if (!repoPath) return
-    api.getFiles().then(data => setFiles(data.tree || []))
-      .catch(err => setError(err.message))
+    api.getFiles().then(data => {
+      const tree = data.tree || []
+      setFiles(tree)
+
+      // Don't auto-open if a file is already active
+      if (activeFilePath) return
+
+      const lastPath = localStorage.getItem('docugit:lastFile')
+      const lastExists = lastPath && findInTree(tree, f => f.path === lastPath)
+      const readme = findInTree(tree, f => /^readme\.md$/i.test(f.name))
+      const toOpen = lastExists || readme
+      if (toOpen) handleOpenFile(toOpen)
+    }).catch(err => setError(err.message))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [repoPath])
 
   // Refresh git status when repo changes or after actions
@@ -80,6 +103,7 @@ function App() {
       setActiveFilePath(filepath)
       setFileContent(data.content)
       setIsDirty(false)
+      localStorage.setItem('docugit:lastFile', filepath)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -117,6 +141,7 @@ function App() {
       setActiveFilePath(data.relative_path)
       setFileContent(data.content)
       setIsDirty(false)
+      localStorage.setItem('docugit:lastFile', data.relative_path)
     } catch (err) {
       setError(err.message)
     } finally {

@@ -1,6 +1,6 @@
 # DocuGit
 
-A lightweight, Word-like WYSIWYG editor for markdown files that live in git repos. Built for developers who generate docs as part of their workflow and want a cleaner editing experience than an IDE.
+A lightweight, Word-like WYSIWYG editor for markdown files that live in git repos. Built for technical teams who use markdown docs as part of their workflow and want a cleaner editing experience than an IDE.
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ cd docugit
 ./start.sh
 ```
 
-That's it. The script installs dependencies, starts both servers, and prints the URL.
+That's it! The script installs dependencies, starts both servers, and prints the URL.
 
 ## Features
 
@@ -39,13 +39,6 @@ The repo includes sample docs in `docs/` so you can test immediately:
 The `docs/getting-started.md` file has a full walkthrough of the git workflow.
 
 ## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Editor | TipTap v3 + `@tiptap/markdown` |
-| Frontend | React 19, Vite 7, Tailwind CSS 4 |
-| Backend | Flask 3.1, GitPython |
-| Database | None — config persisted to a local JSON file |
 
 ## Project Structure
 
