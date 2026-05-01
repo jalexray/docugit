@@ -2,13 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
+const apiPort = process.env.DOCUGIT_API_PORT || '5015'
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:5015',
+      '/api': `http://localhost:${apiPort}`,
     },
   },
-
 })
