@@ -1,0 +1,9 @@
+node_modules/
+dist/
+api/venv/
+api/.env
+api/app.db
+api/.docugit_config.json
+__pycache__/
+*.pyc
+.DS_Store
