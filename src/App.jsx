@@ -24,9 +24,22 @@ function App() {
   const [fileContent, setFileContent] = useState('')
   const [isDirty, setIsDirty] = useState(false)
   const [gitStatus, setGitStatus] = useState(null)
-  const [showGitPanel, setShowGitPanel] = useState(true)
+  const [showSidebar, setShowSidebar] = useState(
+    () => localStorage.getItem('docugit:showSidebar') !== 'false'
+  )
+  const [showGitPanel, setShowGitPanel] = useState(
+    () => localStorage.getItem('docugit:showGitPanel') !== 'false'
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    localStorage.setItem('docugit:showSidebar', showSidebar)
+  }, [showSidebar])
+
+  useEffect(() => {
+    localStorage.setItem('docugit:showGitPanel', showGitPanel)
+  }, [showGitPanel])
 
   // Load saved config on mount
   useEffect(() => {
@@ -210,6 +223,8 @@ function App() {
           />
         ) : null
       }
+      showSidebar={showSidebar}
+      onToggleSidebar={() => setShowSidebar(!showSidebar)}
       showGitPanel={showGitPanel}
       onToggleGitPanel={() => setShowGitPanel(!showGitPanel)}
       error={error}
