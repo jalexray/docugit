@@ -19,11 +19,13 @@ function findInTree(tree, predicate) {
 
 function App() {
   const [repoPath, setRepoPath] = useState(null)
+  const [hasGit, setHasGit] = useState(false)
   const [files, setFiles] = useState([])
   const [activeFilePath, setActiveFilePath] = useState(null)
   const [fileContent, setFileContent] = useState('')
   const [isDirty, setIsDirty] = useState(false)
   const [gitStatus, setGitStatus] = useState(null)
+  const [showSidebar, setShowSidebar] = useState(true)
   const [showGitPanel, setShowGitPanel] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -33,6 +35,7 @@ function App() {
     api.getConfig().then(data => {
       if (data.repo_path) {
         setRepoPath(data.repo_path)
+        setHasGit(!!data.has_git)
       }
     }).catch(() => {})
   }, [])
@@ -58,9 +61,9 @@ function App() {
 
   // Refresh git status when repo changes or after actions
   const refreshGitStatus = useCallback(() => {
-    if (!repoPath) return
+    if (!repoPath || !hasGit) return
     api.getGitStatus().then(setGitStatus).catch(() => {})
-  }, [repoPath])
+  }, [repoPath, hasGit])
 
   useEffect(() => {
     refreshGitStatus()
@@ -72,6 +75,7 @@ function App() {
       const data = await api.setConfig(path)
       if (data.valid) {
         setRepoPath(data.repo_path)
+        setHasGit(!!data.has_git)
         setActiveFilePath(null)
         setFileContent('')
         setIsDirty(false)
@@ -85,6 +89,7 @@ function App() {
 
   const handleClearRepo = () => {
     setRepoPath(null)
+    setHasGit(false)
     setFiles([])
     setActiveFilePath(null)
     setFileContent('')
@@ -133,6 +138,7 @@ function App() {
       setLoading(true)
       const data = await api.openDoc(filePath)
       // Update repo if changed
+      setHasGit(!!data.has_git)
       if (data.repo_path !== repoPath) {
         setRepoPath(data.repo_path)
         const filesData = await api.getFiles()
@@ -202,7 +208,7 @@ function App() {
         )
       }
       gitPanel={
-        showGitPanel && repoPath ? (
+        showGitPanel && repoPath && hasGit ? (
           <GitPanel
             gitStatus={gitStatus}
             onRefresh={refreshGitStatus}
@@ -210,11 +216,14 @@ function App() {
           />
         ) : null
       }
+      showSidebar={showSidebar}
+      onToggleSidebar={() => setShowSidebar(!showSidebar)}
       showGitPanel={showGitPanel}
       onToggleGitPanel={() => setShowGitPanel(!showGitPanel)}
       error={error}
       onDismissError={() => setError(null)}
       repoPath={repoPath}
+      hasGit={hasGit}
     />
   )
 }

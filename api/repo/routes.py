@@ -42,7 +42,9 @@ def _safe_path(repo_path, filepath):
 
 @bp.get("/config")
 def get_config():
-    return jsonify(_load_config())
+    config = _load_config()
+    config.setdefault("has_git", False)
+    return jsonify(config)
 
 
 @bp.post("/config")
@@ -59,14 +61,15 @@ def set_config():
         return jsonify({"error": "Directory does not exist", "valid": False}), 400
 
     # Check if it's a git repo
+    has_git = True
     try:
         GitService(repo_path)
     except InvalidGitRepositoryError:
-        return jsonify({"error": "Not a git repository", "valid": False}), 400
+        has_git = False
 
-    config = {"repo_path": repo_path}
+    config = {"repo_path": repo_path, "has_git": has_git}
     _save_config(config)
-    return jsonify({"repo_path": repo_path, "valid": True})
+    return jsonify({"repo_path": repo_path, "has_git": has_git, "valid": True})
 
 
 @bp.get("/discover")
@@ -138,14 +141,17 @@ def open_doc():
         return jsonify({"error": "Not a markdown file"}), 400
 
     repo_path = GitService.detect_repo(path)
-    if not repo_path:
-        return jsonify({"error": "No git repository found for this file"}), 404
+    has_git = repo_path is not None
 
-    # Compute relative path within the repo
+    # If no git repo, use the file's parent directory as root
+    if not repo_path:
+        repo_path = os.path.dirname(path)
+
+    # Compute relative path within the repo/root
     relative_path = os.path.relpath(path, repo_path)
 
-    # Save repo config
-    config = {"repo_path": repo_path}
+    # Save config
+    config = {"repo_path": repo_path, "has_git": has_git}
     _save_config(config)
 
     # Read file content
@@ -155,6 +161,7 @@ def open_doc():
     return jsonify({
         "repo_path": repo_path,
         "relative_path": relative_path,
+        "has_git": has_git,
         "content": content,
     })
 
