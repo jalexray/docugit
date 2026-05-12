@@ -9,6 +9,7 @@ export default function Layout({
   error,
   onDismissError,
   repoPath,
+  hasGit,
 }) {
   const toggleClass = (active) =>
     `text-xs px-2 py-1 rounded border ${
@@ -22,20 +23,20 @@ export default function Layout({
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-gray-50 shrink-0">
         <div className="flex items-center gap-3">
-          <button
-            onClick={onToggleSidebar}
-            className={toggleClass(showSidebar)}
-            title={showSidebar ? 'Hide files panel' : 'Show files panel'}
-          >
-            Files
-          </button>
           <h1 className="text-sm font-semibold text-gray-700 tracking-wide">DocuGit</h1>
-        </div>
-        <div className="flex items-center gap-3">
           {repoPath && (
-            <span className="text-xs text-gray-400 truncate max-w-80">{repoPath}</span>
+            <button
+              onClick={onToggleSidebar}
+              className={`text-xs px-2 py-1 rounded border ${
+                showSidebar
+                  ? 'bg-gray-200 border-gray-300 text-gray-700'
+                  : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              Files
+            </button>
           )}
-          {repoPath && (
+          {repoPath && hasGit && (
             <button
               onClick={onToggleGitPanel}
               className={toggleClass(showGitPanel)}
@@ -43,6 +44,11 @@ export default function Layout({
             >
               Git
             </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {repoPath && (
+            <span className="text-xs text-gray-400 truncate max-w-80">{repoPath}</span>
           )}
         </div>
       </header>
