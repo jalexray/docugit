@@ -32,3 +32,9 @@ export const gitCommit = (message) => invoke('git_commit', { message })
 export const gitUnpushed = () => invoke('git_unpushed')
 export const gitPush = () => invoke('git_push')
 export const gitLog = (limit = 20) => invoke('git_log', { limit })
+
+// Terminal
+export const ptySpawn = () => invoke('pty_spawn')
+export const ptyWrite = (data) => invoke('pty_write', { data })
+export const ptyResize = (cols, rows) => invoke('pty_resize', { cols, rows })
+export const ptyKill = () => invoke('pty_kill')

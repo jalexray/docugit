@@ -1,6 +1,7 @@
 mod config;
 mod files;
 mod git;
+mod terminal;
 
 #[tauri::command]
 fn get_config() -> Result<serde_json::Value, String> {
@@ -54,6 +55,7 @@ fn set_config(repo_path: String) -> Result<serde_json::Value, String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .manage(terminal::PtyState::new())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -86,6 +88,10 @@ pub fn run() {
             git::git_push,
             git::git_unpushed,
             git::git_log,
+            terminal::pty_spawn,
+            terminal::pty_write,
+            terminal::pty_resize,
+            terminal::pty_kill,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar/Sidebar'
 import Editor from './components/Editor/Editor'
 import EmptyState from './components/Editor/EmptyState'
 import GitPanel from './components/GitPanel/GitPanel'
+import TerminalPanel from './components/Terminal/TerminalPanel'
 import * as api from './tauri-api'
 
 function findInTree(tree, predicate) {
@@ -31,6 +32,8 @@ function App() {
   const [showGitPanel, setShowGitPanel] = useState(
     () => localStorage.getItem('docugit:showGitPanel') !== 'false'
   )
+  const [showTerminal, setShowTerminal] = useState(false)
+  const [terminalMounted, setTerminalMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -236,10 +239,21 @@ function App() {
           />
         ) : null
       }
+      terminalPanel={
+        terminalMounted && repoPath ? (
+          <TerminalPanel onClose={() => setShowTerminal(false)} />
+        ) : null
+      }
       showSidebar={showSidebar}
       onToggleSidebar={() => setShowSidebar(!showSidebar)}
       showGitPanel={showGitPanel}
       onToggleGitPanel={() => setShowGitPanel(!showGitPanel)}
+      showTerminal={showTerminal}
+      onToggleTerminal={() => {
+        const next = !showTerminal
+        setShowTerminal(next)
+        if (next) setTerminalMounted(true)
+      }}
       error={error}
       onDismissError={() => setError(null)}
       repoPath={repoPath}

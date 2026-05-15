@@ -25,3 +25,4 @@ tauri = { version = "2.11.1", features = [] }
 tauri-plugin-log = "2"
 dirs = "6"
 tauri-plugin-dialog = "2"
+portable-pty = "0.8"
