@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar/Sidebar'
 import Editor from './components/Editor/Editor'
 import EmptyState from './components/Editor/EmptyState'
 import GitPanel from './components/GitPanel/GitPanel'
-import * as api from './api'
+import * as api from './tauri-api'
 
 function findInTree(tree, predicate) {
   for (const item of tree) {
@@ -80,6 +80,14 @@ function App() {
   useEffect(() => {
     refreshGitStatus()
   }, [refreshGitStatus])
+
+  // macOS: show dot on close button when document has unsaved changes
+  useEffect(() => {
+    if (!window.__TAURI_INTERNALS__) return
+    import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+      getCurrentWindow().setDocumentEdited(isDirty).catch(() => {})
+    }).catch(() => {})
+  }, [isDirty])
 
   const handleSetRepo = async (path) => {
     try {
