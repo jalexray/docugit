@@ -4,7 +4,8 @@ import Sidebar from './components/Sidebar/Sidebar'
 import Editor from './components/Editor/Editor'
 import EmptyState from './components/Editor/EmptyState'
 import GitPanel from './components/GitPanel/GitPanel'
-import * as api from './api'
+import TerminalPanel from './components/Terminal/TerminalPanel'
+import * as api from './tauri-api'
 
 function findInTree(tree, predicate) {
   for (const item of tree) {
@@ -31,6 +32,8 @@ function App() {
   const [showGitPanel, setShowGitPanel] = useState(
     () => localStorage.getItem('docugit:showGitPanel') !== 'false'
   )
+  const [showTerminal, setShowTerminal] = useState(false)
+  const [terminalMounted, setTerminalMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -80,6 +83,14 @@ function App() {
   useEffect(() => {
     refreshGitStatus()
   }, [refreshGitStatus])
+
+  // macOS: show dot on close button when document has unsaved changes
+  useEffect(() => {
+    if (!window.__TAURI_INTERNALS__) return
+    import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+      getCurrentWindow().setDocumentEdited(isDirty).catch(() => {})
+    }).catch(() => {})
+  }, [isDirty])
 
   const handleSetRepo = async (path) => {
     try {
@@ -228,10 +239,21 @@ function App() {
           />
         ) : null
       }
+      terminalPanel={
+        terminalMounted && repoPath ? (
+          <TerminalPanel onClose={() => setShowTerminal(false)} />
+        ) : null
+      }
       showSidebar={showSidebar}
       onToggleSidebar={() => setShowSidebar(!showSidebar)}
       showGitPanel={showGitPanel}
       onToggleGitPanel={() => setShowGitPanel(!showGitPanel)}
+      showTerminal={showTerminal}
+      onToggleTerminal={() => {
+        const next = !showTerminal
+        setShowTerminal(next)
+        if (next) setTerminalMounted(true)
+      }}
       error={error}
       onDismissError={() => setError(null)}
       repoPath={repoPath}

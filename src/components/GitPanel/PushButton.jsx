@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import * as api from '../../api'
+import * as api from '../../tauri-api'
 
 export default function PushButton({ onRefresh, refreshKey }) {
   const [pushing, setPushing] = useState(false)

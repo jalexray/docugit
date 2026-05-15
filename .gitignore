@@ -7,3 +7,4 @@ api/.docugit_config.json
 __pycache__/
 *.pyc
 .DS_Store
+src-tauri/target/

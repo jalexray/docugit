@@ -1,17 +1,24 @@
 import { useState } from 'react'
-import * as api from '../../api'
-import FileBrowser from './FileBrowser'
+import * as api from '../../tauri-api'
+import { open } from '@tauri-apps/plugin-dialog'
 
 export default function RepoPicker({ repoPath, onSetRepo, onClearRepo, onOpenDoc }) {
   const [mode, setMode] = useState('doc') // 'doc' | 'path' | 'scan' | 'detect'
   const [input, setInput] = useState('')
   const [repos, setRepos] = useState([])
   const [scanning, setScanning] = useState(false)
-  const [showBrowser, setShowBrowser] = useState(false)
 
-  const handleSubmitPath = (e) => {
-    e.preventDefault()
-    if (input.trim()) onSetRepo(input.trim())
+  const handleBrowseDoc = async () => {
+    const selected = await open({
+      filters: [{ name: 'Markdown', extensions: ['md'] }],
+      multiple: false,
+    })
+    if (selected && onOpenDoc) onOpenDoc(selected)
+  }
+
+  const handleBrowseFolder = async () => {
+    const selected = await open({ directory: true })
+    if (selected) onSetRepo(selected)
   }
 
   const handleScan = async (e) => {
@@ -37,11 +44,6 @@ export default function RepoPicker({ repoPath, onSetRepo, onClearRepo, onOpenDoc
     } catch {
       // error handled by parent
     }
-  }
-
-  const handleBrowseSelect = (filePath) => {
-    setShowBrowser(false)
-    if (onOpenDoc) onOpenDoc(filePath)
   }
 
   if (repoPath) {
@@ -89,20 +91,26 @@ export default function RepoPicker({ repoPath, onSetRepo, onClearRepo, onOpenDoc
 
       {mode === 'doc' ? (
         <button
-          onClick={() => setShowBrowser(true)}
+          onClick={handleBrowseDoc}
           className="w-full text-xs px-2 py-1.5 bg-gray-700 text-white rounded hover:bg-gray-800"
         >
           Browse for Document...
         </button>
+      ) : mode === 'path' ? (
+        <button
+          onClick={handleBrowseFolder}
+          className="w-full text-xs px-2 py-1.5 bg-gray-700 text-white rounded hover:bg-gray-800"
+        >
+          Choose Folder...
+        </button>
       ) : (
-        <form onSubmit={mode === 'scan' ? handleScan : mode === 'detect' ? handleDetect : handleSubmitPath}>
+        <form onSubmit={mode === 'scan' ? handleScan : handleDetect}>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={
-              mode === 'path' ? '/path/to/repo'
-              : mode === 'scan' ? '/parent/directory'
+              mode === 'scan' ? '/parent/directory'
               : '/path/to/any/file'
             }
             className="w-full text-xs px-2 py-1.5 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
@@ -112,7 +120,7 @@ export default function RepoPicker({ repoPath, onSetRepo, onClearRepo, onOpenDoc
             disabled={!input.trim() || scanning}
             className="mt-1.5 w-full text-xs px-2 py-1.5 bg-gray-700 text-white rounded hover:bg-gray-800 disabled:opacity-50"
           >
-            {mode === 'scan' ? (scanning ? 'Scanning...' : 'Scan') : mode === 'detect' ? 'Detect' : 'Open'}
+            {mode === 'scan' ? (scanning ? 'Scanning...' : 'Scan') : 'Detect'}
           </button>
         </form>
       )}
@@ -133,13 +141,6 @@ export default function RepoPicker({ repoPath, onSetRepo, onClearRepo, onOpenDoc
         </div>
       )}
 
-      {/* File browser modal */}
-      {showBrowser && (
-        <FileBrowser
-          onSelect={handleBrowseSelect}
-          onClose={() => setShowBrowser(false)}
-        />
-      )}
     </div>
   )
 }

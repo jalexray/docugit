@@ -2,10 +2,13 @@ export default function Layout({
   sidebar,
   editor,
   gitPanel,
+  terminalPanel,
   showSidebar,
   onToggleSidebar,
   showGitPanel,
   onToggleGitPanel,
+  showTerminal,
+  onToggleTerminal,
   error,
   onDismissError,
   repoPath,
@@ -45,6 +48,18 @@ export default function Layout({
               Git
             </button>
           )}
+          {repoPath && (
+            <button
+              onClick={onToggleTerminal}
+              className={`text-xs px-2 py-1 rounded border ${
+                showTerminal
+                  ? 'bg-gray-200 border-gray-300 text-gray-700'
+                  : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              Terminal
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {repoPath && (
@@ -72,9 +87,21 @@ export default function Layout({
           </div>
         )}
 
-        {/* Editor */}
-        <div className="flex-1 min-w-0 overflow-y-auto">
-          {editor}
+        {/* Center: editor + terminal stacked vertically */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Editor */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {editor}
+          </div>
+
+          {/* Terminal Panel — kept mounted, hidden via CSS to preserve session */}
+          {terminalPanel && (
+            <div
+              className={`shrink-0 border-t border-gray-600 ${showTerminal ? 'h-72' : 'h-0 overflow-hidden'}`}
+            >
+              {terminalPanel}
+            </div>
+          )}
         </div>
 
         {/* Git Panel */}

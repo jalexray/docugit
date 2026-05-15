@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import * as api from '../../api'
+import * as api from '../../tauri-api'
 
 function FileRow({ path, type, checked, onChange }) {
   const typeLabel = { A: 'added', M: 'modified', D: 'deleted', R: 'renamed' }

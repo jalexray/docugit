@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import * as api from '../../api'
+import * as api from '../../tauri-api'
 
 export default function CommitForm({ message, setMessage, gitStatus, onRefresh, onRefreshFiles }) {
   const [committing, setCommitting] = useState(false)
